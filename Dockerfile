@@ -3,7 +3,7 @@ FROM alpine:3.14
 ARG TARGETARCH
 
 ADD src/install.sh install.sh
-RUN chmod +x install.sh && ./install.sh && rm install.sh
+RUN sh install.sh && rm install.sh
 
 ENV POSTGRES_DATABASE ''
 ENV POSTGRES_HOST ''
