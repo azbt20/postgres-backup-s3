@@ -1,4 +1,4 @@
-FROM postgres:17.6.0-alpine
+FROM postgres:17
 
 ADD src/install.sh install.sh
 RUN sh install.sh && rm install.sh && mkdir -p /metrics
