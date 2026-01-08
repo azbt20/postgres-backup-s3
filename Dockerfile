@@ -26,6 +26,5 @@ ADD src/run.sh run.sh
 ADD src/env.sh env.sh
 ADD src/backup.sh backup.sh
 ADD src/restore.sh restore.sh
-ADD src/write_metrics.sh write_metrics.sh
 
 CMD ["sh", "run.sh"]
