@@ -1,7 +1,7 @@
 FROM postgres:17
 
-ADD src/install.sh install.sh
-RUN sh install.sh && rm install.sh && mkdir -p /metrics
+COPY src/*.sh .
+RUN sh install.sh
 
 ENV POSTGRES_DATABASE ''
 ENV POSTGRES_HOST ''
@@ -21,10 +21,5 @@ ENV PASSPHRASE ''
 ENV BACKUP_KEEP_DAYS ''
 ENV S3_PREFIX ''
 ENV ENABLE_METRICS ''
-
-ADD src/run.sh run.sh
-ADD src/env.sh env.sh
-ADD src/backup.sh backup.sh
-ADD src/restore.sh restore.sh
 
 CMD ["sh", "run.sh"]
