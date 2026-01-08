@@ -1,7 +1,13 @@
 FROM postgres:17-alpine
 
-COPY src/*.sh .
-RUN sh install.sh
+ARG TARGETARCH
+ENV TARGETARCH=${TARGETARCH}
+
+WORKDIR /app
+
+COPY --chmod=755 src/*.sh .
+
+RUN ./install.sh
 
 ENV POSTGRES_DATABASE ''
 ENV POSTGRES_HOST ''
@@ -22,4 +28,4 @@ ENV BACKUP_KEEP_DAYS ''
 ENV S3_PREFIX ''
 ENV ENABLE_METRICS ''
 
-CMD ["sh", "run.sh"]
+CMD ["./run.sh"]
