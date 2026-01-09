@@ -77,7 +77,8 @@ if [ "${POSTGRES_BACKUP_ALL}" == "true" ]; then
     echo "Creating dump of database: $DB"
 
     SRC_FILE=${DB}.sql.gz
-    DEST_FILE=${DB}_$(date +"%Y-%m-%dT%H:%M:%SZ").sql.gz
+    timestamp=$(date +"%Y-%m-%dT%H:%M:%S")
+    DEST_FILE=${DB}_${timestamp}.sql.gz
 
     if [ "${S3_FILE_NAME}" != "**None**" ]; then
       DEST_FILE=${S3_FILE_NAME}_${DB}.sql.gz
