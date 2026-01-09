@@ -111,7 +111,6 @@ if [ "${POSTGRES_BACKUP_ALL}" == "true" ]; then
       rm -f "$SRC_FILE"
     fi
   done
-fi
 else
   OIFS="$IFS"
   IFS=','
