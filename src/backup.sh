@@ -63,32 +63,54 @@ else
 fi
 
 if [ "${POSTGRES_BACKUP_ALL}" == "true" ]; then
-  SRC_FILE=dump.sql.gz
-  DEST_FILE=all_$(date +"%Y-%m-%dT%H:%M:%SZ").sql.gz
-  
-  if [ "${S3_FILE_NAME}" != "**None**" ]; then
-    DEST_FILE=${S3_FILE_NAME}.sql.gz
-  fi
+  echo "Creating dump of all accessible databases from ${POSTGRES_HOST}..."
 
-  echo "Creating dump of all databases from ${POSTGRES_HOST}..."
-  pg_dumpall $POSTGRES_HOST_OPTS | gzip > $SRC_FILE
+  DB_LIST=$(psql $POSTGRES_HOST_OPTS -Atc "
+    SELECT datname
+    FROM pg_database
+    WHERE datallowconn
+      AND datistemplate = false
+  ")
 
-  if [ "${ENCRYPTION_PASSWORD}" != "**None**" ]; then
-    echo "Encrypting ${SRC_FILE}"
-    openssl enc -aes-256-cbc -in $SRC_FILE -out ${SRC_FILE}.enc -k $ENCRYPTION_PASSWORD
-    if [ $? != 0 ]; then
-      >&2 echo "Error encrypting ${SRC_FILE}"
+  for DB in $DB_LIST; do
+    echo "---------------------------------------"
+    echo "Creating dump of database: $DB"
+
+    SRC_FILE=${DB}.sql.gz
+    DEST_FILE=${DB}_$(date +"%Y-%m-%dT%H:%M:%SZ").sql.gz
+
+    if [ "${S3_FILE_NAME}" != "**None**" ]; then
+      DEST_FILE=${S3_FILE_NAME}_${DB}.sql.gz
     fi
-    rm $SRC_FILE
-    SRC_FILE="${SRC_FILE}.enc"
-    DEST_FILE="${DEST_FILE}.enc"
-  fi
 
-  echo "Uploading dump to $S3_BUCKET"
-  cat $SRC_FILE | aws $AWS_ARGS s3 cp - "s3://${S3_BUCKET}${S3_PREFIX}${DEST_FILE}" || exit 2
+    if pg_dump $POSTGRES_HOST_OPTS "$DB" | gzip > "$SRC_FILE"; then
 
-  echo "SQL backup uploaded successfully"
-  rm -rf $SRC_FILE
+      if [ "${ENCRYPTION_PASSWORD}" != "**None**" ]; then
+        echo "Encrypting ${SRC_FILE}"
+        openssl enc -aes-256-cbc \
+          -in "$SRC_FILE" \
+          -out "${SRC_FILE}.enc" \
+          -k "$ENCRYPTION_PASSWORD"
+
+        rm "$SRC_FILE"
+        SRC_FILE="${SRC_FILE}.enc"
+        DEST_FILE="${DEST_FILE}.enc"
+      fi
+
+      echo "Uploading dump of $DB to $S3_BUCKET"
+      aws $AWS_ARGS s3 cp \
+        "$SRC_FILE" \
+        "s3://${S3_BUCKET}${S3_PREFIX}${DEST_FILE}" || exit 2
+
+      rm -f "$SRC_FILE"
+      echo "✅ $DB backup uploaded"
+
+    else
+      echo "⚠️  Skipping $DB (no permissions)"
+      rm -f "$SRC_FILE"
+    fi
+  done
+fi
 else
   OIFS="$IFS"
   IFS=','
