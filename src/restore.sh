@@ -8,10 +8,10 @@ s3_uri_base="s3://${S3_BUCKET}/${S3_PREFIX}"
 export PGPASSWORD=$POSTGRES_PASSWORD
 
 # aws args (endpoint)
-if [ "${S3_ENDPOINT:-}" != "" ]; then
-  aws_args="--endpoint-url ${S3_ENDPOINT}"
-else
+if [ "${S3_ENDPOINT}" == "**None**" ]; then
   aws_args=""
+else
+  aws_args="--endpoint-url ${S3_ENDPOINT}"
 fi
 
 # ---------------------------
