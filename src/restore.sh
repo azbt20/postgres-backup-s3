@@ -28,7 +28,7 @@ fi
 # -------------------------
 # AWS CLI args
 # -------------------------
-if [ "${S3_ENDPOINT:-}" != "" ]; then
+if [ "${S3_ENDPOINT:-}" != "**None**" ]; then
   AWS_ARGS="--endpoint-url ${S3_ENDPOINT}"
 else
   AWS_ARGS=""
