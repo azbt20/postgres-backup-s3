@@ -86,6 +86,13 @@ for DB in $DB_LIST; do
   fi
 
   echo "Restoring into $DB"
+  echo "Terminating active connections to $DB"
+  psql $POSTGRES_HOST_OPTS -d postgres -c "
+    SELECT pg_terminate_backend(pid)
+    FROM pg_stat_activity
+    WHERE datname = '$DB'
+      AND pid <> pg_backend_pid();
+  "
   echo "Dropping database $DB"
   psql $POSTGRES_HOST_OPTS -d postgres -c "DROP DATABASE IF EXISTS \"$DB\";"
   
