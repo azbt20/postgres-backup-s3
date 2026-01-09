@@ -45,7 +45,7 @@ if [ "${POSTGRES_BACKUP_ALL}" = "true" ]; then
   echo "Restoring all accessible databases..."
   DB_LIST=$(psql $POSTGRES_HOST_OPTS -d postgres -Atc "
     SELECT datname FROM pg_database
-    WHERE datallowconn AND datistemplate = false
+    WHERE datallowconn AND datistemplate = false AND datname <> 'postgres'
   ")
 else
   DB_LIST=$(echo "$POSTGRES_DATABASE" | tr ',' ' ')
