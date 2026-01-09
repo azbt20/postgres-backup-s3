@@ -65,12 +65,12 @@ fi
 if [ "${POSTGRES_BACKUP_ALL}" == "true" ]; then
   echo "Creating dump of all accessible databases from ${POSTGRES_HOST}..."
 
-  DB_LIST=$(psql $POSTGRES_HOST_OPTS -Atc "
+  DB_LIST=$(psql $POSTGRES_HOST_OPTS -d postgres -Atc "
     SELECT datname
     FROM pg_database
     WHERE datallowconn
       AND datistemplate = false
-  ")
+")
 
   for DB in $DB_LIST; do
     echo "---------------------------------------"
