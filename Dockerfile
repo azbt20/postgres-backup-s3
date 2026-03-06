@@ -28,4 +28,4 @@ ENV BACKUP_KEEP_DAYS ''
 ENV S3_PREFIX ''
 ENV ENABLE_METRICS ''
 
-CMD ["./run.sh"]
+CMD ["./decrypt-env.sh", "./run.sh"]

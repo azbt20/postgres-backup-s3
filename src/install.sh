@@ -12,7 +12,7 @@ apk add postgresql-client
 apk add gnupg
 
 apk add aws-cli
-apk add --no-cache openssl
+apk add --no-cache openssl xxd
 
 # install go-cron
 apk add curl
