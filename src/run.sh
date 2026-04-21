@@ -9,5 +9,5 @@ fi
 if [ -z "$SCHEDULE" ]; then
   sh backup.sh
 else
-  exec go-cron "$SCHEDULE" /bin/sh backup.sh
+  exec go-cron "$SCHEDULE" /bin/sh decrypt-env.sh sh backup.sh
 fi
