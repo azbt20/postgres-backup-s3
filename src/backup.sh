@@ -154,12 +154,20 @@ if [ -n "$BACKUP_KEEP_DAYS" ]; then
   date_from_remove=$(date -d "@$(($(date +%s) - sec))" +%Y-%m-%d)
   backups_query="Contents[?LastModified<='${date_from_remove} 00:00:00'].{Key: Key}"
 
+  # Strip leading slash — S3 prefixes must not start with /
+  CLEAN_PREFIX=$(echo "${S3_PREFIX}" | sed 's|^/||')
+
   echo "Removing old backups from $S3_BUCKET..."
-  aws $aws_args s3api list-objects \
+  OLD_KEYS=$(aws $AWS_ARGS s3api list-objects \
     --bucket "${S3_BUCKET}" \
-    --prefix "${S3_PREFIX}" \
+    --prefix "${CLEAN_PREFIX}" \
     --query "${backups_query}" \
-    --output text \
-    | xargs -n1 -t -I 'KEY' aws $aws_args s3 rm s3://"${S3_BUCKET}"/'KEY'
+    --output text)
+
+  if [ -n "$OLD_KEYS" ] && [ "$OLD_KEYS" != "None" ]; then
+    echo "$OLD_KEYS" | xargs -n1 -t -I 'KEY' aws $AWS_ARGS s3 rm s3://"${S3_BUCKET}"/'KEY'
+  else
+    echo "No old backups to remove."
+  fi
   echo "Removal complete."
 fi
